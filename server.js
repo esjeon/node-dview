@@ -92,9 +92,11 @@ function handler(req, resp) {
     return;
   
   var filename = root + req.url.pathname;
-  var exists = fs.existsSync(filename);
-  var isfile = fs.statSync(filename).isFile();
-  if (exists && isfile) {
+  if (! fs.existsSync(filename))
+    return resp404(resp);
+
+  var stat = fs.statSync(filename);
+  if (stat.isFile()) {
     resp.setHeader("Content-Type", mime.lookup(filename));
 
     fs.readFile(filename, function(err, data) {
@@ -144,9 +146,11 @@ io.sockets.on('connection', function(sock) {
     console.log('client\tjoin\t' + data.pathname);
 
     var file = root + data.pathname;
-    files.push(file);
-    watchFile(file, function() { signalClient(file, 'reload', {}); });
-    sock.join(file);
+    if (isWatched(file) || fs.existsSync(file)) {
+      files.push(file);
+      watchFile(file, function() { signalClient(file, 'reload', {}); });
+      sock.join(file);
+    }
   });
 
   sock.on('alive', function () {
