@@ -1,0 +1,16 @@
+{
+	"name": "dview",
+	"version": "0.0.1",
+	"author": {
+		"name": "Eon S. Jeon"
+	},
+	"repository": {
+	"type": "hg",
+		"url": "https://bitbucket.org/EonJeon/dview"
+	},
+	"dependencies": {
+		"mime": "*",
+		"socket.io": "0.9.x"
+	},
+	"scripts": { "start": "node server.js" }
+}

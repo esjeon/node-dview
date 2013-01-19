@@ -1,0 +1,46 @@
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+(function () {
+  var stamp = undefined;
+
+  var res = [];
+  (function () {
+    var elms = document.getElementsByTagName('script');
+    var host = location.protocol + "//" + location.host;
+		var i;
+    for (i = 0; i < elms.length; i ++) {
+      if (elms[i].src.match(/^\/socket.io/)) continue;
+      if (elms[i].src.length > 0)
+        res.push(elms[i].src.replace(host,''));
+    }
+  }) ();
+
+  var sock = io.connect('http://localhost:8080/', {
+    'reconnect': true,
+    'reconnection delay': 1000,
+    'max reconnection attempts': Infinity
+  });
+  sock.on('hello', function (data) {
+		var i;
+
+    if (! stamp) {
+      stamp = data.stamp;
+    } else if (stamp != data.stamp) {
+      window.location.reload(true);
+      return;
+    }
+
+    sock.emit('join', { pathname: (""+window.location.pathname) });
+    for (i = 0; i < res.length; i ++) {
+      sock.emit('join', { pathname: res[i] });
+    }
+
+    setInterval(function() {
+      sock.emit('alive', {});
+    }, 15000);
+  });
+  sock.on('reload', function () {
+    window.location.reload(true);
+  });
+}) ();
+</script>
