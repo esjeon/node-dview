@@ -9,7 +9,7 @@
     var host = location.protocol + "//" + location.host;
 		var i;
     for (i = 0; i < elms.length; i ++) {
-      if (elms[i].src.match(/^\/socket.io/)) continue;
+      if (elms[i].src.match("/socket.io/")) continue;
       if (elms[i].src.length > 0)
         res.push(elms[i].src.replace(host,''));
     }
