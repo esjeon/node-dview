@@ -26,7 +26,7 @@
     res.push(elm.href.replace(host,''));
   });
 
-  var sock = io.connect('http://localhost:8080/', {
+  var sock = io.connect('http://' + location.host, {
     'reconnect': true,
     'reconnection delay': 1000,
     'max reconnection attempts': Infinity
