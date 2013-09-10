@@ -87,33 +87,35 @@ function resp404(resp) {
 }
 
 function handler(req, resp) {
+  var url = req.url;
   req.url = urlparse(req.url);
   if (req.url.pathname === '/favicon.ico')
-    return;
+    return resp404(resp);
   
   var filename = root + req.url.pathname;
   if (! fs.existsSync(filename))
     return resp404(resp);
 
   var stat = fs.statSync(filename);
-  if (stat.isFile()) {
-    resp.setHeader("Content-Type", mime.lookup(filename));
-
-    fs.readFile(filename, function(err, data) {
-      if (err) resp404(resp)
-      else {
-        if (filename.match(/\.html?$/))
-          data += tail;
-        resp.writeHead(200);
-        resp.end(data);
-      }
-    });
-  } else {
+  if (! stat.isFile()) {
     if (isWatched(filename))
       unwatchFile(filename);
 
-    resp404(resp);
+    return resp404(resp);
   }
+
+  fs.readFile(filename, function(err, data) {
+    if (err)
+      return resp404(resp)
+
+    var type = mime.lookup(filename);
+    resp.setHeader("Content-Type", type);
+
+    if (filename.match(/\.html?$/))
+      data += tail;
+    resp.writeHead(200);
+    resp.end(data);
+  });
 }
 
 app.listen(8080);
