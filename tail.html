@@ -2,18 +2,29 @@
 <script type="text/javascript">
 (function () {
   var stamp = undefined;
-
   var res = [];
-  (function () {
-    var elms = document.getElementsByTagName('script');
-    var host = location.protocol + "//" + location.host;
-		var i;
-    for (i = 0; i < elms.length; i ++) {
-      if (elms[i].src.match("/socket.io/")) continue;
-      if (elms[i].src.length > 0)
-        res.push(elms[i].src.replace(host,''));
+  var host = location.protocol + "//" + location.host;
+
+  function getElements(query) {
+    try {
+      var elms = document.querySelectorAll(query);
+      return Array.prototype.slice.call(elms);
+    } catch (e) {
+      return [];
     }
-  }) ();
+  }
+
+  getElements('script, img')
+    .filter(function(elm) {
+      return !(elm.src.match("/socket.io/"));
+    })
+    .forEach(function(elm) {
+      res.push(elm.src.replace(host,''));
+    });
+
+  getElements('link[rel=stylesheet]').forEach(function(elm) {
+    res.push(elm.href.replace(host,''));
+  });
 
   var sock = io.connect('http://localhost:8080/', {
     'reconnect': true,
@@ -21,7 +32,7 @@
     'max reconnection attempts': Infinity
   });
   sock.on('hello', function (data) {
-		var i;
+    var i;
 
     if (! stamp) {
       stamp = data.stamp;
